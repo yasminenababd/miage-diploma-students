@@ -8,9 +8,11 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
 import javax.servlet.Servlet;
@@ -57,26 +59,35 @@ public class Main {
 		}
 	}
 
-	protected static void handleResponse(Response response, int studentId) throws IOException {
+	protected static Student getStudentData(int studentId) {
 		// create an arrayList of the students, because iterables are too hard
 		ArrayList<Student> students = new ArrayList<>();
 		Iterables.addAll(students, StudentRepository.withDB("src/main/resources/students.db"));
 
 		for (int i = 0; i < students.size(); i++) {
 			if (i == studentId) {
-				Student student = students.get(i);
-				response.setContentType("application/pdf");
-
-				DiplomaGenerator generator = new MiageDiplomaGenerator(student);
-				try (InputStream is = generator.getContent()) {
-					try (NIOOutputStream os = response.createOutputStream()) {
-						ByteStreams.copy(is, os);
-					}
-
-				}
-				return;
+				return students.get(i);
 			}
 		}
+		
+		throw new NoSuchElementException();
+
+	}
+
+	protected static void handleResponse(Response response, int studentId) throws IOException {
+
+		response.setContentType("application/pdf");
+
+		Student student = getStudentData(studentId);
+		
+		DiplomaGenerator generator = new MiageDiplomaGenerator(student);
+		try (InputStream is = generator.getContent()) {
+			try (NIOOutputStream os = response.createOutputStream()) {
+				ByteStreams.copy(is, os);
+			}
+
+		}
+		return;
 	}
 
 	protected static void addDiplomaPath(HttpServer server, String path) {
