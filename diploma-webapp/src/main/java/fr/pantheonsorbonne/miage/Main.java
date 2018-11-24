@@ -40,6 +40,10 @@ public class Main {
 	public static final String HOST = "localhost";
 	public static final int PORT = 7000;
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
+	private static StudentRepository studentRepo;
+	{
+		StudentRepository.withDB("src/main/resources/students.db");
+	}
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
 
@@ -59,17 +63,17 @@ public class Main {
 		}
 	}
 
-	protected static Student getStudentData(int studentId) {
+	protected static Student getStudentData(int studentId, StudentRepository repo) {
 		// create an arrayList of the students, because iterables are too hard
 		ArrayList<Student> students = new ArrayList<>();
-		Iterables.addAll(students, StudentRepository.withDB("src/main/resources/students.db"));
+		Iterables.addAll(students, repo);
 
 		for (int i = 0; i < students.size(); i++) {
 			if (i == studentId) {
 				return students.get(i);
 			}
 		}
-		
+
 		throw new NoSuchElementException();
 
 	}
@@ -78,8 +82,8 @@ public class Main {
 
 		response.setContentType("application/pdf");
 
-		Student student = getStudentData(studentId);
-		
+		Student student = getStudentData(studentId, studentRepo);
+
 		DiplomaGenerator generator = new MiageDiplomaGenerator(student);
 		try (InputStream is = generator.getContent()) {
 			try (NIOOutputStream os = response.createOutputStream()) {
