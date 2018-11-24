@@ -2,14 +2,13 @@ package fr.pantheonsorbonne.miage;
 
 public class Student {
 
+	
 	private int id;
 
-
-	public Student(int id, String name, String title) {
+	public Student(int id,String name, String title) {
 		this.name = name;
 		this.title = title;
-		this.id = id;
-
+		this.id=id;
 	}
 
 	private String name;
@@ -35,11 +34,9 @@ public class Student {
 	public int getId() {
 		return this.id;
 	}
-
+	
 	@Override
 	public String toString() {
-		return this.getTitle() + " " + this.getName();
+		return this.getTitle()+" "+this.getName();
 	}
-
-	
 }
