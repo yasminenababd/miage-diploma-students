@@ -8,14 +8,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
 
 public class StudentRepository implements Iterable<Student> {
 
@@ -24,7 +20,7 @@ public class StudentRepository implements Iterable<Student> {
 
 	private StudentRepository(String db) {
 		this.db = db;
-	};
+	}
 
 	public static StudentRepository withDB(String db) {
 		return new StudentRepository(db);
@@ -58,18 +54,21 @@ public class StudentRepository implements Iterable<Student> {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public java.util.Iterator<Student> iterator() {
 		try (FileReader reader = new FileReader(this.db)) {
+			
 
 			CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
-			this.currentIterator = parser.parse(reader, CSVFormat.DEFAULT);
-			this.currentIterator = parser.getRecords().stream().map((record)-> new Student(Integer.parseInt(reccord.get(2)), reccord.get(1), reccord.get(3))).map(c -> (Student) c).iterator();
+			this.currentIterator = parser.getRecords().stream()
+					.map(reccord -> new Student(Integer.parseInt(reccord.get(2)), reccord.get(0), reccord.get(1)))
+					.map(c -> c).iterator();
 			return this.currentIterator;
-			
+
 		} catch (IOException e) {
 			Logger.getGlobal().info("IO PB" + e.getMessage());
-			return Collections.EMPTY_SET.iterator();
+			return Collections.emptySet().iterator();
 		}
 	}
 
